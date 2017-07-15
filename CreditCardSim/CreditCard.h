@@ -11,7 +11,11 @@ public:
 	CreditCard(int);
 	double getCreditLimit();
 	double getBalanceDue();
+	double getAvailCredit();
 	int getAccountNum();
+	bool increaseCreditLimit(double);
+	bool processTransaction(double);
+	bool processTransaction(double,string);
 	~CreditCard(void);
 
 private:
@@ -20,6 +24,7 @@ private:
 	string vErrorMsg;
 	double vBalanceDue;
 	double vCreditLimit;
+	double availCredit;
 	void writeStatus();
 	void writeLog(string);
 	string CCName;

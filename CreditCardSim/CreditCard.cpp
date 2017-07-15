@@ -4,8 +4,10 @@
 #include <fstream>
 #include <ctime>
 #include <sstream>
+#include <cstring>
 
 using namespace std;
+using namespace System;
 
 CreditCard::CreditCard()
 {
@@ -36,7 +38,6 @@ CreditCard::CreditCard()
 
 CreditCard::CreditCard(int anum)
 {
-	
 	string filename;
 	ifstream fin;
 	ostringstream n;
@@ -75,9 +76,57 @@ double CreditCard::getBalanceDue()
 	return vBalanceDue;
 }
 
+double CreditCard::getAvailCredit()
+{
+	return availCredit;
+}
+
 int CreditCard::getAccountNum()
 {
 	return accountNum;
+}
+
+bool CreditCard::increaseCreditLimit(double amt)
+{
+	srand((unsigned)time(0));
+	if (rand() % 2 == 0) {
+		writeStatus();
+		writeLog("Limit Increase : " + to_string(amt) + ", approved.");
+		vCreditLimit += ((amt / 100) * 100);//get a whole number for the increase amount in case they enter a number such as 250
+		return true;
+	}
+
+	writeStatus();
+	writeLog("Limit Increase : " + to_string(amt) + ", declined.");
+	return false;
+}
+
+bool CreditCard::processTransaction(double amt)
+{
+	if (amt - availCredit < 0) {
+		writeStatus();
+		writeLog("Payment must not be more than " + to_string(availCredit) + ". " + to_string(amt) + " not accepted.");
+		return false;
+	}
+	
+	availCredit -= amt;
+	writeStatus();
+	writeLog("Payment: " + to_string(amt));
+	return true;
+}
+
+bool CreditCard::processTransaction(double amt, string desc)
+{
+	if (amt + availCredit > vCreditLimit) {
+		writeStatus();
+		writeLog("Charge: " + to_string(amt) + " declined. Not enough available credit.");
+		return false;
+	}
+	
+	availCredit += amt;
+	writeStatus();
+	writeLog("Charge: " + to_string(amt) + ", " + desc);
+	return true;
 }
 
 void CreditCard::writeStatus()
@@ -107,7 +156,7 @@ void CreditCard::writeLog(string message)
 	ofstream fout;
 	fout.open(CCLName.c_str(),ios_base::app);
 	if (fout.is_open()) {
-		fout << message << " occurred at " << ctime(&rawtime) << endl;
+		fout << message << ", on " << ctime(&rawtime) << endl;
 		fout.close();
 	}
 	else {
