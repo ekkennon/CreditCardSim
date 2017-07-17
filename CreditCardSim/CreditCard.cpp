@@ -28,10 +28,14 @@ CreditCard::CreditCard()
 		fin.open(filename.c_str());
 	} while (fin.is_open());
 	fin.close();
+
 	vCreditLimit = 1000;
 	vBalanceDue = 0;
+	availCredit = 1000;
+
 	CCName = filename;
 	CCLName = "CCL" + n.str() + ".txt";
+
 	writeStatus();
 	writeLog("Account " + n.str() + " opened.");
 }
@@ -50,6 +54,7 @@ CreditCard::CreditCard(int anum)
 		accountNum = anum;
 		fin >> vCreditLimit;
 		fin >> vBalanceDue;
+		fin >> availCredit;
 		fin.close();
 		CCName = filename;
 		CCLName = "CCL" + n.str() + ".txt";
@@ -89,10 +94,11 @@ int CreditCard::getAccountNum()
 bool CreditCard::increaseCreditLimit(double amt)
 {
 	srand((unsigned)time(0));
-	if (rand() % 2 == 0) {
+	if (rand() % 2 == 1) {
 		writeStatus();
 		writeLog("Limit Increase : " + to_string(amt) + ", approved.");
 		vCreditLimit += ((amt / 100) * 100);//get a whole number for the increase amount in case they enter a number such as 250
+		availCredit = vCreditLimit - vBalanceDue;
 		return true;
 	}
 
@@ -109,7 +115,8 @@ bool CreditCard::processTransaction(double amt)
 		return false;
 	}
 	
-	availCredit -= amt;
+	availCredit += amt;
+	vBalanceDue = vCreditLimit - availCredit;
 	writeStatus();
 	writeLog("Payment: " + to_string(amt));
 	return true;
@@ -123,7 +130,8 @@ bool CreditCard::processTransaction(double amt, string desc)
 		return false;
 	}
 	
-	availCredit += amt;
+	availCredit -= amt;
+	vBalanceDue = vCreditLimit - availCredit;
 	writeStatus();
 	writeLog("Charge: " + to_string(amt) + ", " + desc);
 	return true;
@@ -139,6 +147,7 @@ void CreditCard::writeStatus()
 	if (fout.is_open()) {
 		fout << vCreditLimit << endl;
 		fout << vBalanceDue << endl;
+		fout << availCredit << endl;
 		fout.close();
 	}
 	else {
@@ -162,6 +171,23 @@ void CreditCard::writeLog(string message)
 	else {
 		vError = true;
 		vErrorMsg = "Unable to write log entry: " + message;
+	}
+}
+
+void CreditCard::readLog()
+{
+	ifstream fin;
+
+	fin.open(CCLName.c_str());
+	if (fin.is_open()) {
+		fin >> vCreditLimit;
+		fin >> vBalanceDue;
+		fin >> availCredit;
+		fin.close();
+	}
+	else {
+		vError = true;
+		vErrorMsg = "Unable to read log.";
 	}
 }
 

@@ -21,13 +21,15 @@ public:
 private:
 	int accountNum;
 	bool vError;
-	string vErrorMsg;
 	double vBalanceDue;
 	double vCreditLimit;
 	double availCredit;
-	void writeStatus();
-	void writeLog(string);
+	string vErrorMsg;
 	string CCName;
 	string CCLName;
+
+	void writeStatus();
+	void writeLog(string);
+	void readLog();
 };
 

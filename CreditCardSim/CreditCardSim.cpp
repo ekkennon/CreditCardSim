@@ -12,6 +12,7 @@ int getValue(string);
 void requestIncrease(bool);
 void transact(bool);
 string getDescription(string);
+void printHistory();
 
 int main()
 {
@@ -31,12 +32,12 @@ int main()
 		cc = new CreditCard();
 	}
 
-	cout << "Your account number: " << cc->getAccountNum() << endl;
-	cout << "Your credit limit: " << cc->getCreditLimit() << endl;
+	cout << "\nYour account number: " << cc->getAccountNum() << endl;
+	cout << "Your credit limit: " << cc->getCreditLimit() << endl << endl;
 
 	int transType;
 	do {
-		cout << "Transaction Options:" << endl << "0. Quit" << endl << "1. New Charge" << endl << "2. Payment" << endl << "3. Credit Increase Request" << endl << "4. Card History" << endl;
+		cout << "Transaction Options:" << endl << "0. Quit" << endl << "1. New Charge" << endl << "2. Payment" << endl << "3. Credit Increase Request" << endl << "4. Card History" << endl << endl;
 		transType = getValue("Choice: ");
 		switch (transType) {
 		case 1:
@@ -49,14 +50,14 @@ int main()
 			requestIncrease(cc->increaseCreditLimit(getValue("Requested Increase: ")));
 			break;
 		case 4:
-			break;
-		default:
-
+			printHistory();
 		}
 
-		cout << "Account Balance: " << endl << "Outstanding Balance: " << endl << "Your credit limit: " << cc->getCreditLimit() << endl << "Availale Credit" << endl;
+		cout << "\n\nAccount Number: " << cc->getAccountNum() << endl << "Outstanding Balance: " << cc->getBalanceDue() << endl << "Your credit limit: " << cc->getCreditLimit() << endl << "Availale Credit: " << cc->getAvailCredit() << endl << endl;
 
 	} while (transType > 0 && transType < 5);
+
+	cout << "Thank you for using the credit card simulator!" << endl;
 
 	system("Pause");
     return 0;
@@ -115,4 +116,8 @@ void transact(bool approved) {
 	else {
 		cout << "The transaction was denied. Please check the amount and try again.";
 	}
+}
+
+void printHistory() {
+
 }
