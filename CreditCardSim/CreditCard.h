@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -15,7 +16,8 @@ public:
 	int getAccountNum();
 	bool increaseCreditLimit(double);
 	bool processTransaction(double);
-	bool processTransaction(double,string);
+	bool processTransaction(string,double);
+	vector<string> readLog();
 	~CreditCard(void);
 
 private:
@@ -30,6 +32,5 @@ private:
 
 	void writeStatus();
 	void writeLog(string);
-	void readLog();
 };
 

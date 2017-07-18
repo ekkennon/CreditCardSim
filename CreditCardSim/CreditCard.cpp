@@ -5,6 +5,7 @@
 #include <ctime>
 #include <sstream>
 #include <cstring>
+#include <vector>
 
 using namespace std;
 using namespace System;
@@ -70,7 +71,6 @@ CreditCard::CreditCard(int anum)
 	}
 }
 
-
 double CreditCard::getCreditLimit()
 {
 	return vCreditLimit;
@@ -95,23 +95,23 @@ bool CreditCard::increaseCreditLimit(double amt)
 {
 	srand((unsigned)time(0));
 	if (rand() % 2 == 1) {
-		writeStatus();
-		writeLog("Limit Increase : " + to_string(amt) + ", approved.");
-		vCreditLimit += ((amt / 100) * 100);//get a whole number for the increase amount in case they enter a number such as 250
+		vCreditLimit += ((int)(amt / 100) * 100);//get a whole number for the increase amount in case they enter a number such as 250
 		availCredit = vCreditLimit - vBalanceDue;
+		writeStatus();
+		writeLog("Limit Increase: " + to_string(amt) + ", approved.");
 		return true;
 	}
 
 	writeStatus();
-	writeLog("Limit Increase : " + to_string(amt) + ", declined.");
+	writeLog("Limit Increase: " + to_string(amt) + ", declined.");
 	return false;
 }
 
 bool CreditCard::processTransaction(double amt)
 {
-	if (amt - availCredit < 0) {
+	if (vBalanceDue - amt < 0) {
 		writeStatus();
-		writeLog("Payment must not be more than " + to_string(availCredit) + ". " + to_string(amt) + " not accepted.");
+		writeLog("Payment declined. Must be less than " + to_string(vBalanceDue) + ". " + to_string(amt) + " not accepted.");
 		return false;
 	}
 	
@@ -122,11 +122,11 @@ bool CreditCard::processTransaction(double amt)
 	return true;
 }
 
-bool CreditCard::processTransaction(double amt, string desc)
+bool CreditCard::processTransaction(string desc, double amt)
 {
-	if (amt + availCredit > vCreditLimit) {
+	if (amt + vBalanceDue > vCreditLimit) {
 		writeStatus();
-		writeLog("Charge: " + to_string(amt) + " declined. Not enough available credit.");
+		writeLog("Charge: " + to_string(amt) + " declined. Must be less than " + to_string(availCredit) + ".");
 		return false;
 	}
 	
@@ -165,7 +165,7 @@ void CreditCard::writeLog(string message)
 	ofstream fout;
 	fout.open(CCLName.c_str(),ios_base::app);
 	if (fout.is_open()) {
-		fout << message << ", on " << ctime(&rawtime) << endl;
+		fout << message << " Occurred " << ctime(&rawtime);
 		fout.close();
 	}
 	else {
@@ -174,21 +174,25 @@ void CreditCard::writeLog(string message)
 	}
 }
 
-void CreditCard::readLog()
+vector<string> CreditCard::readLog()
 {
 	ifstream fin;
+	vector<string> lines;
 
 	fin.open(CCLName.c_str());
 	if (fin.is_open()) {
-		fin >> vCreditLimit;
-		fin >> vBalanceDue;
-		fin >> availCredit;
+		string row;
+		while (getline(fin, row)) {
+			lines.push_back(row);
+		}
 		fin.close();
 	}
 	else {
 		vError = true;
 		vErrorMsg = "Unable to read log.";
 	}
+
+	return lines;
 }
 
 CreditCard::~CreditCard()
